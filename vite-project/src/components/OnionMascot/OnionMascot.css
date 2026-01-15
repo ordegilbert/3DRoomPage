@@ -1,0 +1,12 @@
+.onion {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  cursor: pointer;
+  font-size: 48px;
+  transition: transform 0.2s;
+}
+
+.onion:hover {
+  transform: scale(1.1);
+}

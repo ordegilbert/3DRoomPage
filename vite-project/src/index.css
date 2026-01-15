@@ -1,0 +1,11 @@
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: linear-gradient(#fdfefe, #b7ddff);
+  overflow: hidden;
+}
