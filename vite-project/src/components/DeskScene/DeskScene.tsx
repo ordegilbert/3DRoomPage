@@ -1,4 +1,5 @@
 import "./DeskScene.css";
+import deskImage from "./Web.png";
 
 type DeskSceneProps = {
   onAbout: () => void;
@@ -20,7 +21,7 @@ export function DeskScene({
   return (
     <div className="desk-scene">
       <img
-        src="./Web.png"
+        src= {deskImage}
         alt="Desk scene"
         className="desk-background"
         draggable={false}
