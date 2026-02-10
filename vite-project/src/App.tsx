@@ -4,6 +4,7 @@ import { GamesWindow } from "./windows/GamesWindow";
 import { ContactWindow } from "./windows/ContactWindow";
 import { NewsWindow } from "./windows/NewsWindow";
 import { OnionMascot } from "./components/OnionMascot/OnionMascot";
+import { DeskScene } from "./components/DeskScene/DeskScene";
 import { audio } from "../audio/AudioManager";
 
 type WindowType = "about" | "games" | "contact" | "news";
@@ -11,6 +12,19 @@ type WindowType = "about" | "games" | "contact" | "news";
 function App() {
   const [openWindows, setOpenWindows] = useState<WindowType[]>([]);
   const [focusedWindow, setFocusedWindow] = useState<WindowType | null>(null);
+  const [musicOn, setMusicOn] = useState(false);
+
+  function toggleMusic() {
+  setMusicOn(prev => {
+    if (!prev) {
+      audio.bgm.play();
+    } else {
+      audio.bgm.pause();
+    }
+    return !prev;
+  });
+}
+
 
   function openWindow(type: WindowType) {
     audio.open.play();
@@ -41,6 +55,15 @@ function App() {
   return (
     <>
       <OnionMascot />
+
+      <DeskScene
+        onAbout={() => openWindow("about")}
+        onGames={() => openWindow("games")}
+        onNews={() => openWindow("news")}
+        onContact={() => openWindow("contact")}
+        onToggleMusic={toggleMusic}
+        musicOn={musicOn}
+      />
 
       <div style={{ padding: 16 }}>
         <button onClick={() => openWindow("about")}>About</button>
@@ -81,6 +104,7 @@ function App() {
         />
       )}
     </>
+    
   );
 }
 

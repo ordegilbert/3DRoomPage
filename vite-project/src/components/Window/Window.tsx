@@ -1,5 +1,6 @@
 import Draggable from "react-draggable";
 import { useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import "./window.css";
 
 type WindowProps = {
@@ -27,17 +28,27 @@ export function Window({
     >
       <div
         ref={nodeRef}
-        className={`window ${focused ? "window-focused" : ""}`}
         style={{ zIndex: focused ? 10 : 1 }}
+        onMouseDownCapture={onFocus}
       >
-        <div className="window-title">
-          <span>{title}</span>
-          <button onClick={onClose}>✕</button>
-        </div>
+        <AnimatePresence>
+          <motion.div
+            className={`window ${focused ? "window-focused" : ""}`}
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.92 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            <div className="window-title">
+              <span>{title}</span>
+              <button onClick={onClose}>✕</button>
+            </div>
 
-        <div className="window-content">
-          {children}
-        </div>
+            <div className="window-content">
+              {children}
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </Draggable>
   );

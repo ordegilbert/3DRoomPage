@@ -28,6 +28,10 @@
   cursor:grab;
 }
 
+.window-focused .window-title {
+  background: #2f2f2f;
+}
+
 .window-title button {
   background: none;
   border: none;

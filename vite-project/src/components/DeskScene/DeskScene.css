@@ -1,0 +1,65 @@
+.desk-scene {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.desk-background {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Base hitbox */
+.hitbox {
+  position: absolute;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* DEBUG MODE (toggle on if needed) */
+/*
+.hitbox {
+  outline: 2px dashed red;
+}
+*/
+
+/* Approximate positions — tweak visually */
+.mug {
+  left: 8%;
+  top: 28%;
+  width: 10%;
+  height: 18%;
+}
+
+.calendar {
+  left: 45%;
+  top: 20%;
+  width: 18%;
+  height: 30%;
+}
+
+.phone {
+  left: 48%;
+  top: 55%;
+  width: 16%;
+  height: 20%;
+}
+
+.letter {
+  right: 8%;
+  bottom: 12%;
+  width: 18%;
+  height: 20%;
+}
+
+.person {
+  left: 4%;
+  bottom: 8%;
+  width: 20%;
+  height: 35%;
+}
