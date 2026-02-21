@@ -1,9 +1,18 @@
-import { Window } from "../components/Window/Window";
+import { StickyNoteWindow } from '../components/Window/StickyNoteWindow';
 
-export function ContactWindow({ onClose, onFocus, focused }: { onClose: () => void; onFocus: () => void; focused: boolean }) {
+export function ContactWindow({
+  onClose,
+  onFocus,
+  focused,
+}: {
+  onClose: () => void;
+  onFocus: () => void;
+  focused: boolean;
+}) {
   return (
-    <Window title="Contact Bawang Studio" onClose={onClose} onFocus={onFocus} focused={focused}>
-      <p>bawanggamestudio@gmail.com.</p>
-    </Window>
+    <StickyNoteWindow onClose={onClose} onFocus={onFocus} focused={focused}>
+      <h2>Contact Us</h2>
+      <p>bawanggamestudio@gmail.com</p>
+    </StickyNoteWindow>
   );
 }

@@ -1,0 +1,49 @@
+.sticky-window {
+  position: relative;
+  width: 100%;   /* match your art */
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+/* Sticky note image */
+.sticky-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Content area (below pin & line) */
+.sticky-content {
+  position: absolute;
+  top: 44px;     /* below pin + line */
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+
+  font-family: inherit;
+  color: #4b4b2a;
+  overflow-y: auto;
+}
+
+/* Optional close hitbox (top-right corner) */
+.sticky-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.sticky-wrapper {
+  width: 360px;   /* EXACT same as sticky-window */
+  height: 360px;
+  position: absolute;
+}
+

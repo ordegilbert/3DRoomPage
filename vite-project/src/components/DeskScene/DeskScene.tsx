@@ -1,5 +1,10 @@
 import "./DeskScene.css";
-import deskImage from "./Web.png";
+import web from "./Web.png";
+
+import aboutHover from "./AboutUsHover.png";
+import gamesHover from "./GamesHover.png";
+import newsHover from "./NewsHover.png";
+import contactHover from "./ContactUsHover.png";
 
 type DeskSceneProps = {
   onAbout: () => void;
@@ -16,28 +21,37 @@ export function DeskScene({
   onNews,
   onContact,
   onToggleMusic,
-  musicOn
+  musicOn,
 }: DeskSceneProps) {
   return (
     <div className="desk-scene">
-      <img
-        src= {deskImage}
-        alt="Desk scene"
-        className="desk-background"
-        draggable={false}
-      />
+      <div className="scene-container">
+      {/* BACKGROUND */}
+      <img className="desk-bg" src={web} draggable={false} />
 
-      {/* ABOUT — Mug */}
-      <button className="hitbox mug" onClick={onAbout} />
+      {/* ABOUT */}
+      <div className="object about">
+        <img className="hover" src={aboutHover} />
+        <button className="hitbox about-hitbox" onClick={onAbout} />
+      </div>
 
-      {/* NEWS — Calendar */}
-      <button className="hitbox calendar" onClick={onNews} />
+      {/* GAMES */}
+      <div className="object games">
+        <img className="hover" src={gamesHover} />
+        <button className="hitbox games-hitbox" onClick={onGames} />
+      </div>
 
-      {/* GAMES — Phone */}
-      <button className="hitbox phone" onClick={onGames} />
+      {/* NEWS */}
+      <div className="object news">
+        <img className="hover" src={newsHover} />
+        <button className="hitbox news-hitbox" onClick={onNews} />
+      </div>
 
-      {/* CONTACT — Letter */}
-      <button className="hitbox letter" onClick={onContact} />
+      {/* CONTACT */}
+      <div className="object contact">
+        <img className="hover" src={contactHover} />
+        <button className="hitbox contact-hitbox" onClick={onContact} />
+      </div>
 
       {/* MUSIC — Person */}
       <button
@@ -45,5 +59,6 @@ export function DeskScene({
         onClick={onToggleMusic}
       />
     </div>
+  </div>
   );
 }

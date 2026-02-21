@@ -1,16 +1,28 @@
 import news from "../data/news.json";
-import { Window } from "../components/Window/Window";
+import { StickyNoteWindow } from "../components/Window/StickyNoteWindow";
 
-export function NewsWindow({ onClose, onFocus, focused }: { onClose: () => void; onFocus: () => void; focused: boolean }) {
+export function NewsWindow({
+  onClose,
+  onFocus,
+  focused,
+}: {
+  onClose: () => void;
+  onFocus: () => void;
+  focused: boolean;
+}) {
   return (
-    <Window title="News & Updates" onClose={onClose} onFocus={onFocus} focused={focused}>
+    <StickyNoteWindow onClose={onClose} onFocus={onFocus} focused={focused}>
+          <h2>News!</h2>
+          <p>Coming soon!</p>
       {news.map((item, index) => (
         <div key={index}>
           <strong>{item.date}</strong>
           <p>{item.title}</p>
-          <a href={item.link} target="_blank">Read</a>
+          <a href={item.link} target="_blank">
+            Read
+          </a>
         </div>
       ))}
-    </Window>
+    </StickyNoteWindow>
   );
 }

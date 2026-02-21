@@ -1,19 +1,36 @@
 .desk-scene {
   position: fixed;
   inset: 0;
+  background: black;
+  display: grid;
+  place-items: center;
   overflow: hidden;
 }
 
-.desk-background {
+.desk-bg {
+  position: absolute;
   width: 100%;
   height: 100%;
   object-fit: cover;
   image-rendering: pixelated;
-  user-select: none;
   pointer-events: none;
 }
 
-/* Base hitbox */
+.scene-container {
+  position: relative;
+  width: min(100vw, calc(100vh * (16 / 9)));
+  height: min(100vh, calc(100vw * (9 / 16)));
+  box-shadow: 0 0 60px rgba(0,0,0,0.8);
+}
+
+.hover {
+  position: absolute;
+  opacity: 0;
+  image-rendering: pixelated;
+  transition: opacity 0.12s steps(1);
+}
+
+
 .hitbox {
   position: absolute;
   background: transparent;
@@ -21,40 +38,116 @@
   cursor: pointer;
 }
 
-/* DEBUG MODE (toggle on if needed) */
+/* DEBUG */
 /*
 .hitbox {
   outline: 2px dashed red;
 }
 */
 
+
+.object {
+  position: absolute;
+}
+
+.object .hover {
+  position: absolute;
+  opacity: 0;
+  image-rendering: pixelated;
+  pointer-events: none;
+  transition: opacity 0.12s steps(1);
+}
+
+.object .hitbox {
+  position: absolute;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.object:hover .hover {
+  opacity: 1;
+}
+
 /* Approximate positions — tweak visually */
-.mug {
-  left: 13%;
-  top: 7%;
-  width: 18%;
-  height: 30%;
+.object.about {
+  left: 14.16%;
+  top: 11.11%;
+  width: 16.87%;
+  height: 28.51%;
 }
 
-.calendar {
-  left: 48%;
-  top: 7%;
-  width: 30%;
-  height: 45%;
+.object.about .hover {
+  width: 100%;
+  height: 100%;
 }
 
-.phone {
-  left: 52%;
-  top: 55%;
-  width: 16%;
-  height: 20%;
+.about-hitbox {
+  position: absolute;
+  left: 12px;
+  top: 15px;
+  width: 300px;
+  height: 290px;
 }
 
-.letter {
-  right: 5%;
-  bottom: 1%;
-  width: 30%;
-  height: 20%;
+.object.games {
+  left: 48.125%;
+  top: 51.85%;
+  width: 22.7%;
+  height: 28.889%;
+}
+
+.object.games .hover {
+  width: 100%;
+  height: 100%;
+}
+
+.games-hitbox {
+  position: absolute;
+  left: 20px;
+  top: 15px;
+  width: 400px;
+  height: 300px;
+}
+
+.object.news {
+  left: 47.08%;
+  top: 8.889%;
+  width: 35.41%;
+  height: 47.407%;
+}
+
+.object.news .hover{
+  width: 100%;
+  height: 100%;
+}
+
+.news-hitbox {
+  position: absolute;
+  left: 15px;
+  top: 12px;
+  width: 650px;
+  height: 450px;
+}
+
+.object.contact {
+  right: 0.197%;
+  bottom: 0.351%;
+  width: 36.25%;
+  height: 28.889%;
+}
+
+.object.contact .hover {
+  width: 100%;
+  height: 100%;
+}
+
+.contact-hitbox {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 600px;
+  height: 250px;
 }
 
 .person {
