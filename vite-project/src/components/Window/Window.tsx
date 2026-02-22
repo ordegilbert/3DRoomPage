@@ -9,8 +9,8 @@ type WindowProps = {
   onFocus: () => void;
   focused: boolean;
   children: React.ReactNode;
-
-  initialPosition?: { x: number; y: number };
+  initialLeft?: string;
+  initialTop?: string;
 };
 
 export function Window({
@@ -19,6 +19,8 @@ export function Window({
   onFocus,
   focused,
   children,
+  initialLeft = "20%",
+  initialTop = "20%",
 }: WindowProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
 
@@ -26,12 +28,16 @@ export function Window({
     <Draggable
       handle=".window-title"
       nodeRef={nodeRef}
-      defaultPosition={initialPosition ?? { x: 400, y: 200 }}
       onStart={onFocus}
     >
       <div
         ref={nodeRef}
-        style={{ zIndex: focused ? 10 : 1 }}
+        style={{ 
+          position: "absolute", 
+          left: initialLeft, 
+          top: initialTop,
+          zIndex: focused ? 10 : 1 
+        }}
         onMouseDownCapture={onFocus}
       >
         <AnimatePresence>
@@ -47,7 +53,9 @@ export function Window({
               <button onClick={onClose}>✕</button>
             </div>
 
-            <div className="window-content">{children}</div>
+            <div className="window-content">
+              {children}
+            </div>
           </motion.div>
         </AnimatePresence>
       </div>

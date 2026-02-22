@@ -77,6 +77,8 @@ function App() {
           onClose={() => closeWindow("about")}
           onFocus={() => focusWindow("about")}
           focused={focusedWindow === "about"}
+          initialLeft="15%"
+          initialTop="10%"
         />
       )}
 
@@ -85,6 +87,8 @@ function App() {
           onClose={() => closeWindow("games")}
           onFocus={() => focusWindow("games")}
           focused={focusedWindow === "games"}
+          initialLeft="35%"
+          initialTop="45%"
         />
       )}
 
@@ -93,6 +97,8 @@ function App() {
           onClose={() => closeWindow("contact")}
           onFocus={() => focusWindow("contact")}
           focused={focusedWindow === "contact"}
+          initialLeft="60%"
+          initialTop="50%"
         />
       )}
 
@@ -101,6 +107,8 @@ function App() {
           onClose={() => closeWindow("news")}
           onFocus={() => focusWindow("news")}
           focused={focusedWindow === "news"}
+          initialLeft="45%"
+          initialTop="5%"
         />
       )}
     </>

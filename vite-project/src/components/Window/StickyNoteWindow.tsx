@@ -9,25 +9,31 @@ type StickyNoteWindowProps = {
   onFocus: () => void;
   focused: boolean;
   children: React.ReactNode;
+  initialLeft?: string;
+  initialTop?: string;
 };
 
 export function StickyNoteWindow({
   onClose,
   onFocus,
   focused,
-  children
+  children,
+  initialLeft = "20%",
+  initialTop = "20%",
 }: StickyNoteWindowProps) {
   const nodeRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Draggable
-      nodeRef={nodeRef}
-      onStart={onFocus}
-    >
+    <Draggable nodeRef={nodeRef} onStart={onFocus}>
       <div
         ref={nodeRef}
         className="sticky-wrapper"
-        style={{ zIndex: focused ? 10 : 1 }}
+        style={{
+          position: "absolute",
+          left: initialLeft,
+          top: initialTop,
+          zIndex: focused ? 10 : 1,
+        }}
         onMouseDownCapture={onFocus}
       >
         <AnimatePresence>
@@ -38,16 +44,10 @@ export function StickyNoteWindow({
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
-            <img
-              src={stickyNote}
-              className="sticky-bg"
-              draggable={false}
-            />
+            <img src={stickyNote} className="sticky-bg" draggable={false} />
 
             {/* Content */}
-            <div className="sticky-content">
-              {children}
-            </div>
+            <div className="sticky-content">{children}</div>
 
             {/* Close (optional invisible hitbox) */}
             <button
