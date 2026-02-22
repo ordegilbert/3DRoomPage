@@ -46,6 +46,7 @@
 */
 
 
+
 .object {
   position: absolute;
 }
@@ -71,8 +72,8 @@
 
 /* Approximate positions — tweak visually */
 .object.about {
-  left: 14.16%;
-  top: 11.11%;
+  left: 18.55%;
+  top: 18.5%;
   width: 16.87%;
   height: 28.51%;
 }
@@ -84,17 +85,17 @@
 
 .about-hitbox {
   position: absolute;
-  left: 12px;
-  top: 15px;
-  width: 300px;
-  height: 290px;
+  left: 5%;
+  top: 5%;
+  width: 90%;
+  height: 90%;
 }
 
 .object.games {
-  left: 48.125%;
-  top: 51.85%;
-  width: 22.7%;
-  height: 28.889%;
+  left: 31.3%;
+  top: 48.5%;
+  width: 26%;
+  height: 35%;
 }
 
 .object.games .hover {
@@ -104,15 +105,15 @@
 
 .games-hitbox {
   position: absolute;
-  left: 20px;
-  top: 15px;
-  width: 400px;
-  height: 300px;
+  left: 8%;
+  top: 8%;
+  width: 84%;
+  height: 84%;
 }
 
 .object.news {
-  left: 47.08%;
-  top: 8.889%;
+  left: 39.8%;
+  top: 4.1%;
   width: 35.41%;
   height: 47.407%;
 }
@@ -124,37 +125,64 @@
 
 .news-hitbox {
   position: absolute;
-  left: 15px;
-  top: 12px;
-  width: 650px;
-  height: 450px;
+  left: 2%;
+  top: 2%;
+  width: 96%;
+  height: 96%;
 }
 
 .object.contact {
-  right: 0.197%;
-  bottom: 0.351%;
-  width: 36.25%;
-  height: 28.889%;
-}
-
-.object.contact .hover {
-  width: 100%;
-  height: 100%;
+  left: 60%;
+  top: 59%;
+  width: 26.667%;
+  height: 41.482%;
 }
 
 .contact-hitbox {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
-  width: 600px;
-  height: 250px;
+  left: 15%;
+  top: 15%;
+  width: 70%;
+  height: 70%;
+  z-index: 3;
+  opacity: 0;
+}
+
+.contact-anim {
+  position: absolute;
+  inset: 0;
+}
+
+.contact-base,
+.contact-border {
+  position: absolute;
+  inset: 0;
+
+  background-repeat: no-repeat;
+  background-size: 400% 600%;
+  image-rendering: pixelated;
+}
+
+.contact-base {
+  background-image: url("./ContactUs.png");
+  z-index: 1;
+}
+
+.contact-border {
+  background-image: url("./ContactUsHover.png");
+  opacity: 0;
+  z-index: 2;
+}
+
+.object.contact:hover .contact-border {
+  opacity: 1;
 }
 
 .person {
   left: 0%;
   bottom: 0%;
-  width: 35%;
-  height: 45%;
+  width: 30%;
+  height: 30%;
 }
 
 .person.active {

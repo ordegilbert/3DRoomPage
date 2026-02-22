@@ -1,0 +1,39 @@
+function ContactAnimated() {
+    const [frame, setFrame] = useState(0);
+  
+    const columns = 4;
+    const rows = 6;
+    const totalFrames = columns * rows;
+  
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setFrame(prev => (prev + 1) % totalFrames);
+      }, 80); // speed control (lower = faster)
+  
+      return () => clearInterval(interval);
+    }, []);
+  
+    const col = frame % columns;
+    const row = Math.floor(frame / columns);
+  
+    const x = (col / (columns - 1)) * 100;
+    const y = (row / (rows - 1)) * 100;
+  
+    return (
+      <>
+        <div
+          className="contact-base"
+          style={{
+            backgroundPosition: `${-x}% ${-y}%`,
+          }}
+        />
+  
+        <div
+          className="contact-border"
+          style={{
+            backgroundPosition: `${-x}% ${-y}%`,
+          }}
+        />
+      </>
+    );
+  }
