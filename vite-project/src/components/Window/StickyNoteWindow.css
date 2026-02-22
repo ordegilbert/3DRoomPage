@@ -1,11 +1,16 @@
+.sticky-wrapper {
+  width: min(360px, 85vw); 
+  aspect-ratio: 1 / 1; 
+  position: absolute;
+}
+
 .sticky-window {
   position: relative;
-  width: 100%;   /* match your art */
+  width: 100%;
   height: 100%;
   image-rendering: pixelated;
 }
 
-/* Sticky note image */
 .sticky-bg {
   position: absolute;
   inset: 0;
@@ -15,35 +20,28 @@
   pointer-events: none;
 }
 
-/* Content area (below pin & line) */
 .sticky-content {
   position: absolute;
-  top: 44px;     /* below pin + line */
-  left: 24px;
-  right: 24px;
-  bottom: 24px;
+  top: 13%; 
+  left: 8%;
+  right: 8%;
+  bottom: 8%;
 
   font-family: inherit;
   color: #4b4b2a;
   overflow-y: auto;
+  
+  font-size: clamp(12px, 3.5vw, 16px); 
 }
 
-/* Optional close hitbox (top-right corner) */
 .sticky-close {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 32px;
-  height: 32px;
+  top: 2%;
+  right: 2%;
+  width: 10%;
+  height: 10%;
 
   background: none;
   border: none;
   cursor: pointer;
 }
-
-.sticky-wrapper {
-  width: 360px;   /* EXACT same as sticky-window */
-  height: 360px;
-  position: absolute;
-}
-

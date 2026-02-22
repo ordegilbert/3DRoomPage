@@ -26,7 +26,7 @@ function ContactAnimated() {
   useEffect(() => {
     const interval = setInterval(() => {
       setFrame((prev) => (prev + 1) % totalFrames);
-    }, 80);
+    }, 120);
 
     return () => clearInterval(interval);
   }, [totalFrames]);
