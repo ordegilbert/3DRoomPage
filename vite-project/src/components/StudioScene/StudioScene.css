@@ -13,6 +13,30 @@
   cursor: e-resize;
 }
 
+.studio-root.edge-top {
+  cursor: n-resize;
+}
+
+.studio-root.edge-bottom {
+  cursor: s-resize;
+}
+
+.studio-root.edge-top.edge-left {
+  cursor: nw-resize;
+}
+
+.studio-root.edge-top.edge-right {
+  cursor: ne-resize;
+}
+
+.studio-root.edge-bottom.edge-left {
+  cursor: sw-resize;
+}
+
+.studio-root.edge-bottom.edge-right {
+  cursor: se-resize;
+}
+
 .studio-root canvas {
   display: block;
   width: 100%;
@@ -49,4 +73,59 @@
 
 .studio-back:hover {
   background: #fff;
+}
+
+.studio-popup {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  pointer-events: auto;
+  backdrop-filter: blur(4px);
+}
+
+.studio-popup-content {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 24px 32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  min-width: 250px;
+  font-family: system-ui, sans-serif;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.studio-popup-content h3 {
+  margin: 0 0 16px 0;
+  color: #1a2a3a;
+  font-size: 1.25rem;
+}
+
+.studio-popup-content button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 24px;
+  font: 600 0.9rem system-ui, sans-serif;
+  color: #fff;
+  background: #2563eb;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.studio-popup-content button:hover {
+  background: #1d4ed8;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
