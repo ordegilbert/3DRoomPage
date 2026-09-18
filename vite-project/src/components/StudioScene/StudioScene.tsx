@@ -8,12 +8,18 @@ import {
   type RefObject,
 } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useGLTF, useProgress } from "@react-three/drei";
+import { useGLTF, useProgress, Html } from "@react-three/drei";
 import { EffectComposer, Vignette, ChromaticAberration } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 import "./StudioScene.css";
-import { TABLE_OBJECT_NAMES, BED_OBJECT_NAMES, LEFT_ROOM_OBJECT_NAMES, UPPER_ROOM_OBJECT_NAMES } from "../../constants/objectNames";
+import { TABLE_OBJECT_NAMES, BED_OBJECT_NAMES, LEFT_ROOM_OBJECT_NAMES, UPPER_ROOM_OBJECT_NAMES, CUSTOM_OBJECT_LABELS } from "../../constants/objectNames";
+import { ContactPopup } from "../Popups/ContactPopup";
+
+const POPUP_COMPONENTS: Record<string, React.FC> = {
+  "02_Clock": ContactPopup,
+};
+
 const MODEL_URL = "/models/roomModel.glb";
 
 /** Standing in the bedroom, looking toward the desk / monitors. */
@@ -73,7 +79,7 @@ function Room({
 }: {
   view: ViewId;
   onZoom: (viewId: ViewId) => void;
-  onObjectClick: (name: string) => void;
+  onObjectClick: (obj: { id: string; label: string; position: "left" | "right" }) => void;
 }) {
   const { scene } = useGLTF(MODEL_URL);
 
@@ -84,34 +90,76 @@ function Room({
     });
   }, [scene]);
 
+  const activeObjects = useMemo(() => {
+    if (view === "home") return [];
+    const names = view === "table" ? TABLE_OBJECT_NAMES :
+      view === "bed" ? BED_OBJECT_NAMES :
+        view === "pinboard" ? LEFT_ROOM_OBJECT_NAMES :
+          view === "clock" ? UPPER_ROOM_OBJECT_NAMES : new Set<string>();
+
+    const list: { name: string; label: string; position: [number, number, number] }[] = [];
+    scene.traverse((obj) => {
+      if (names.has(obj.name) && CUSTOM_OBJECT_LABELS[obj.name]) {
+        const box = new THREE.Box3().setFromObject(obj);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+        list.push({ name: obj.name, label: CUSTOM_OBJECT_LABELS[obj.name], position: [center.x, center.y, center.z] });
+      }
+    });
+    return list;
+  }, [view, scene]);
+
   return (
-    <primitive
-      object={scene}
-      onClick={(event: { object: THREE.Object3D; stopPropagation: () => void }) => {
-        if (view === "home") {
-          if (objectMatches(event.object, TABLE_OBJECT_NAMES)) {
-            event.stopPropagation();
-            onZoom("table");
-          } else if (objectMatches(event.object, BED_OBJECT_NAMES)) {
-            event.stopPropagation();
-            onZoom("bed");
-          } else if (objectMatches(event.object, LEFT_ROOM_OBJECT_NAMES)) {
-            event.stopPropagation();
-            onZoom("pinboard");
-          } else if (objectMatches(event.object, UPPER_ROOM_OBJECT_NAMES)) {
-            event.stopPropagation();
-            onZoom("clock");
+    <group>
+      <primitive
+        object={scene}
+        onClick={(event: any) => {
+          if (view === "home") {
+            if (objectMatches(event.object, TABLE_OBJECT_NAMES)) {
+              event.stopPropagation();
+              onZoom("table");
+            } else if (objectMatches(event.object, BED_OBJECT_NAMES)) {
+              event.stopPropagation();
+              onZoom("bed");
+            } else if (objectMatches(event.object, LEFT_ROOM_OBJECT_NAMES)) {
+              event.stopPropagation();
+              onZoom("pinboard");
+            } else if (objectMatches(event.object, UPPER_ROOM_OBJECT_NAMES)) {
+              event.stopPropagation();
+              onZoom("clock");
+            }
+          } else {
+            let current: THREE.Object3D | null = event.object;
+            let customLabel = null;
+            let objectId = null;
+            while (current) {
+              if (CUSTOM_OBJECT_LABELS[current.name]) {
+                customLabel = CUSTOM_OBJECT_LABELS[current.name];
+                objectId = current.name;
+                break;
+              }
+              current = current.parent;
+            }
+
+            if (customLabel && objectId) {
+              event.stopPropagation();
+              const position = event.clientX > window.innerWidth / 2 ? "left" : "right";
+              onObjectClick({ id: objectId, label: customLabel, position });
+            }
           }
-        } else {
-          event.stopPropagation();
-          onObjectClick(event.object.name);
-        }
-      }}
-    />
+        }}
+      />
+      {activeObjects.map((item, i) => (
+        <Html key={i} position={item.position} center zIndexRange={[100, 0]} style={{ pointerEvents: "none" }}>
+          <div className="floating-icon">
+            <span className="text">{item.label}</span>
+          </div>
+        </Html>
+      ))}
+    </group>
   );
 }
 
-import { useControls } from "leva";
 
 function CameraRig({
   view,
@@ -136,15 +184,6 @@ function CameraRig({
   const desiredPos = useMemo(() => new THREE.Vector3(), []);
   const desiredLook = useMemo(() => new THREE.Vector3(), []);
 
-  const { enabled, x, y, z, tx, ty, tz } = useControls("Camera Tweaks", {
-    enabled: { value: false, label: "Enable Tweaks" },
-    x: { value: 1.75, step: 0.01 },
-    y: { value: 3.05, step: 0.01 },
-    z: { value: -29.35, step: 0.01 },
-    tx: { value: 1.85, step: 0.01, label: "target x" },
-    ty: { value: 2.85, step: 0.01, label: "target y" },
-    tz: { value: -28.4, step: 0.01, label: "target z" },
-  });
 
   useEffect(() => {
     const blockWheel = (event: WheelEvent) => event.preventDefault();
@@ -165,10 +204,7 @@ function CameraRig({
     }
     transitionProgress.current = Math.min(1, transitionProgress.current + dt * 1.2);
 
-    if (enabled) {
-      desiredPos.set(x, y, z);
-      desiredLook.set(tx, ty, tz);
-    } else if (view === "home" || view === "table") {
+    if (view === "home" || view === "table") {
       const ix = intensityXRef.current;
       if (ix < 0) {
         yawRef.current += YAW_SPEED * dt * -ix * Math.max(0, 1 - yawRef.current / MAX_YAW);
@@ -269,12 +305,22 @@ function CameraEffects({ cameraVelocityRef }: { cameraVelocityRef: RefObject<num
 
 function Loader() {
   const { progress, active } = useProgress();
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
-  if (!active && progress === 100) return null;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinTimeElapsed(true);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!active && progress === 100 && minTimeElapsed) return null;
 
   return (
     <div className="studio-loader" aria-live="polite">
-      <p>Loading studio… {Math.min(100, Math.round(progress))}%</p>
+      <div>
+        <img src="./Loading.gif" alt="Loading Bawang" />
+      </div>
     </div>
   );
 }
@@ -317,7 +363,7 @@ export function StudioScene() {
   const yawRef = useRef(0);
   const pitchRef = useRef(0);
   const cameraVelocityRef = useRef(0);
-  const [selectedObject, setSelectedObject] = useState<string | null>(null);
+  const [selectedObject, setSelectedObject] = useState<{ id: string; label: string; position: "left" | "right" } | null>(null);
 
   function handleSetView(newView: ViewId) {
     setView(newView);
@@ -347,7 +393,7 @@ export function StudioScene() {
     <div
       className={`studio-root ${atHome && edgeX ? `edge-${edgeX}` : ""} ${atHome && edgeY ? `edge-${edgeY}` : ""}`}
       onPointerMove={(event) => {
-        if (view !== "home" && view !== "table") {
+        if (selectedObject || (view !== "home" && view !== "table")) {
           setEdges(null, null, 0, 0);
           return;
         }
@@ -387,7 +433,7 @@ export function StudioScene() {
           <Room
             view={view}
             onZoom={(v) => handleSetView(v)}
-            onObjectClick={(name) => setSelectedObject(name)}
+            onObjectClick={(obj) => setSelectedObject(obj)}
           />
         </Suspense>
 
@@ -415,9 +461,21 @@ export function StudioScene() {
       )}
 
       {selectedObject && (
-        <div className="studio-popup">
+        <div className={`studio-popup popup-${selectedObject.position}`}>
           <div className="studio-popup-content">
-            <h3>{selectedObject}</h3>
+            <h3>{selectedObject.label}</h3>
+
+            <div className="studio-popup-inner">
+              {POPUP_COMPONENTS[selectedObject.id] ? (
+                (() => {
+                  const Component = POPUP_COMPONENTS[selectedObject.id];
+                  return <Component />;
+                })()
+              ) : (
+                <p>Content coming soon.</p>
+              )}
+            </div>
+
             <button type="button" onClick={() => setSelectedObject(null)}>
               Close
             </button>

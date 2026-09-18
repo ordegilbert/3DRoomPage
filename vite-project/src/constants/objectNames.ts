@@ -1,12 +1,12 @@
 export const TABLE_OBJECT_NAMES = new Set([
     "02_PC",
     "02_Mouse",
-    "02_Mouse Pad",
-    "02_Drawing Tablet",
+    "02_Mouse_Pad",
+    "02_Drawing_Tablet",
     "02_Pen",
     "02_Phone",
-    "02_Monitor.001",
-    "02_Monitor.002",
+    "02_Monitor001",
+    "02_Monitor002",
     "02_ClipBoard",
     "02_UnderDeskholder",
     "02_ACRemote.001",
@@ -33,19 +33,14 @@ export const UPPER_ROOM_OBJECT_NAMES = new Set([
     "02_Clock",
 ]);
 
-// export const PINBOARD_OBJECT_NAMES = new Set([
-//     "02_Pin Board",
-//     "02_Pin",
-//     "02_Pin.001",
-//     "02_Pin.002",
-//     "02_Pin.003",
-//     "PaperOnThePinboard",
-//     "PaperOnThePinboard.001",
-//     "PaperOnThePinboard.002",
-//     "02_Picture",
-//     "02_Picture.001",
-//     "02_Picture.002",
-//     "02_Picture.003",
-//     "02_Picture.004",
-//     "02_Plug.001",
-// ]);
+export const CUSTOM_OBJECT_LABELS: Record<string, string> = {
+    "02_Clock": "About Us",
+    "02_Canvas": "Press Kit",
+    "02_Drawing_Tablet": "Press Kit",
+    "02_Phone": "Socials",
+    // "02_Monitor001": "Wishlist",
+    "02_Monitor002": "Wishlist",
+    "02_ClipBoard": "Fan Art",
+    "02_Bed": "Contact Us",
+    // Add other objects here to make them clickable and give them custom floating names
+};
