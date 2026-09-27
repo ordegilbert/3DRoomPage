@@ -15,12 +15,47 @@ import * as THREE from "three";
 import "./StudioScene.css";
 import { TABLE_OBJECT_NAMES, BED_OBJECT_NAMES, LEFT_ROOM_OBJECT_NAMES, UPPER_ROOM_OBJECT_NAMES, CUSTOM_OBJECT_LABELS } from "../../constants/objectNames";
 import { ContactPopup } from "../Popups/ContactPopup";
+import { WishlistPopup } from "../Popups/WishlistPopup";
 
 const POPUP_COMPONENTS: Record<string, React.FC> = {
   "02_Clock": ContactPopup,
+  "02_Monitor002": WishlistPopup
 };
 
 const MODEL_URL = "/models/roomModel.glb";
+
+type NavButton = {
+  label: string;
+  defaultImg: string;
+  hoverImg: string;
+} & (
+  | { action: "zoom"; viewId: ViewId }
+  | { action: "object"; objectId: string; objectLabel: string }
+);
+
+const NAV_BUTTONS: Record<ViewId, NavButton[]> = {
+  home: [
+    { label: "Silent Trip", defaultImg: "assets/SilentTrip_default.png", hoverImg: "assets/SilentTrip_hover.png", action: "zoom", viewId: "table" },
+    { label: "Contact Us", defaultImg: "assets/ContactUs_default.png", hoverImg: "assets/ContactUs_hover.png", action: "zoom", viewId: "bed" },
+    { label: "Press Kit", defaultImg: "assets/PressKit_default.png", hoverImg: "assets/PressKit_hover.png", action: "zoom", viewId: "pinboard" },
+    { label: "About Us", defaultImg: "assets/AboutUs_default.png", hoverImg: "assets/AboutUs_hover.png", action: "zoom", viewId: "clock" },
+  ],
+  table: [
+    { label: "Wishlist", defaultImg: "assets/Wishlist_default.png", hoverImg: "assets/Wishlist_hover.png", action: "object", objectId: "02_Monitor002", objectLabel: "Wishlist" },
+    { label: "Socials", defaultImg: "assets/Socials_defauly.png", hoverImg: "assets/Socials_hover.png", action: "object", objectId: "02_Phone", objectLabel: "Socials" },
+    { label: "Fan Art", defaultImg: "assets/FanArt_default.png", hoverImg: "assets/FanArt_hover.png", action: "object", objectId: "02_ClipBoard", objectLabel: "Fan Art" },
+    { label: "Press Kit", defaultImg: "assets/PressKit_default.png", hoverImg: "assets/PressKit_hover.png", action: "object", objectId: "02_Drawing_Tablet", objectLabel: "Press Kit" },
+  ],
+  bed: [
+    { label: "Contact Us", defaultImg: "assets/ContactUs_default.png", hoverImg: "assets/ContactUs_hover.png", action: "object", objectId: "02_Bed", objectLabel: "Contact Us" },
+  ],
+  pinboard: [
+    { label: "Press Kit", defaultImg: "assets/PressKit_default.png", hoverImg: "assets/PressKit_hover.png", action: "object", objectId: "02_Canvas", objectLabel: "Press Kit" },
+  ],
+  clock: [
+    { label: "About Us", defaultImg: "assets/AboutUs_default.png", hoverImg: "assets/AboutUs_hover.png", action: "object", objectId: "02_Clock", objectLabel: "About Us" },
+  ],
+};
 
 /** Standing in the bedroom, looking toward the desk / monitors. */
 const CAMERA_POSITION: [number, number, number] = [1.75, 3.05, -29.35];
@@ -76,10 +111,12 @@ function Room({
   view,
   onZoom,
   onObjectClick,
+  isLoaded,
 }: {
   view: ViewId;
   onZoom: (viewId: ViewId) => void;
   onObjectClick: (obj: { id: string; label: string; position: "left" | "right" }) => void;
+  isLoaded: boolean;
 }) {
   const { scene } = useGLTF(MODEL_URL);
 
@@ -91,19 +128,59 @@ function Room({
   }, [scene]);
 
   const activeObjects = useMemo(() => {
-    if (view === "home") return [];
+    const roomCenter = new THREE.Vector3(1.75, 2.5, -28.4);
+    const dummy = new THREE.Object3D();
+
+    if (view === "home") {
+      const homeLabels: Record<string, { label: string, view: ViewId }> = {
+        "02_Chair": { label: "Silent Trip", view: "table" },
+        "02_Picture": { label: "Contact Us", view: "bed" },
+        "02_Canvas": { label: "Press Kit", view: "pinboard" },
+        "02_Clock": { label: "About Us", view: "clock" }
+      };
+      const list: { name: string; label: string; position: [number, number, number]; rotation: [number, number, number]; viewId?: ViewId }[] = [];
+      scene.traverse((obj) => {
+        if (homeLabels[obj.name]) {
+          const box = new THREE.Box3().setFromObject(obj);
+          const center = new THREE.Vector3();
+          box.getCenter(center);
+
+          dummy.position.copy(center);
+          dummy.lookAt(roomCenter);
+
+          list.push({
+            name: obj.name,
+            label: homeLabels[obj.name].label,
+            position: [center.x, center.y, center.z],
+            rotation: [dummy.rotation.x, dummy.rotation.y, dummy.rotation.z],
+            viewId: homeLabels[obj.name].view
+          });
+        }
+      });
+      return list;
+    }
+
     const names = view === "table" ? TABLE_OBJECT_NAMES :
       view === "bed" ? BED_OBJECT_NAMES :
         view === "pinboard" ? LEFT_ROOM_OBJECT_NAMES :
           view === "clock" ? UPPER_ROOM_OBJECT_NAMES : new Set<string>();
 
-    const list: { name: string; label: string; position: [number, number, number] }[] = [];
+    const list: { name: string; label: string; position: [number, number, number]; rotation: [number, number, number]; viewId?: ViewId }[] = [];
     scene.traverse((obj) => {
       if (names.has(obj.name) && CUSTOM_OBJECT_LABELS[obj.name]) {
         const box = new THREE.Box3().setFromObject(obj);
         const center = new THREE.Vector3();
         box.getCenter(center);
-        list.push({ name: obj.name, label: CUSTOM_OBJECT_LABELS[obj.name], position: [center.x, center.y, center.z] });
+
+        dummy.position.copy(center);
+        dummy.lookAt(roomCenter);
+
+        list.push({
+          name: obj.name,
+          label: CUSTOM_OBJECT_LABELS[obj.name],
+          position: [center.x, center.y, center.z],
+          rotation: [dummy.rotation.x, dummy.rotation.y, dummy.rotation.z]
+        });
       }
     });
     return list;
@@ -149,10 +226,22 @@ function Room({
           }
         }}
       />
-      {activeObjects.map((item, i) => (
-        <Html key={i} position={item.position} center zIndexRange={[100, 0]} style={{ pointerEvents: "none" }}>
-          <div className="floating-icon">
+      {isLoaded && activeObjects.map((item, i) => (
+        <Html key={i} position={item.position} sprite center transform distanceFactor={1.5} zIndexRange={[100, 0]} style={{ pointerEvents: "auto" }}>
+          <div
+            className={`floating-icon item-${item.name.replace(/[^a-zA-Z0-9]/g, '-')}${view !== "home" ? " in-view" : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (view === "home" && item.viewId) {
+                onZoom(item.viewId);
+              } else {
+                const position = e.clientX > window.innerWidth / 2 ? "left" : "right";
+                onObjectClick({ id: item.name, label: item.label, position });
+              }
+            }}
+          >
             <span className="text">{item.label}</span>
+            <div className="hover-icon"></div>
           </div>
         </Html>
       ))}
@@ -303,9 +392,11 @@ function CameraEffects({ cameraVelocityRef }: { cameraVelocityRef: RefObject<num
   );
 }
 
-function Loader() {
+function Loader({ onLoaded }: { onLoaded: () => void }) {
   const { progress, active } = useProgress();
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const [fading, setFading] = useState(false);
+  const [removed, setRemoved] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -314,10 +405,27 @@ function Loader() {
     return () => clearTimeout(timer);
   }, []);
 
-  if (!active && progress === 100 && minTimeElapsed) return null;
+  const isDone = !active && progress === 100 && minTimeElapsed;
+
+  useEffect(() => {
+    if (isDone && !fading) {
+      setFading(true);
+    }
+  }, [isDone, fading]);
+
+  if (removed) return null;
 
   return (
-    <div className="studio-loader" aria-live="polite">
+    <div
+      className={`studio-loader${fading ? " fade-out" : ""}`}
+      aria-live="polite"
+      onAnimationEnd={() => {
+        if (fading) {
+          setRemoved(true);
+          onLoaded();
+        }
+      }}
+    >
       <div>
         <img src="./Loading.gif" alt="Loading Bawang" />
       </div>
@@ -364,6 +472,8 @@ export function StudioScene() {
   const pitchRef = useRef(0);
   const cameraVelocityRef = useRef(0);
   const [selectedObject, setSelectedObject] = useState<{ id: string; label: string; position: "left" | "right" } | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const handleLoaded = useMemo(() => () => setIsLoaded(true), []);
 
   function handleSetView(newView: ViewId) {
     setView(newView);
@@ -434,6 +544,7 @@ export function StudioScene() {
             view={view}
             onZoom={(v) => handleSetView(v)}
             onObjectClick={(obj) => setSelectedObject(obj)}
+            isLoaded={isLoaded}
           />
         </Suspense>
 
@@ -449,36 +560,67 @@ export function StudioScene() {
         />
         <CameraEffects cameraVelocityRef={cameraVelocityRef} />
       </Canvas>
-      <Loader />
+      <Loader onLoaded={handleLoaded} />
+
+      {isLoaded && (
+        <nav className="studio-nav">
+          {NAV_BUTTONS[view].map((btn, i) => (
+            <button
+              key={`${view}-${btn.label}`}
+              type="button"
+              className="studio-nav-btn"
+              style={{ animationDelay: `${i * 0.07}s` }}
+              onClick={() => {
+                if (btn.action === "zoom") {
+                  handleSetView(btn.viewId);
+                } else {
+                  setSelectedObject({
+                    id: btn.objectId,
+                    label: btn.objectLabel,
+                    position: "right",
+                  });
+                }
+              }}
+            >
+              <img className="nav-default" src={btn.defaultImg} alt={btn.label} />
+              <img className="nav-hover" src={btn.hoverImg} alt={btn.label} />
+            </button>
+          ))}
+        </nav>
+      )}
+
       {!atHome && (
         <button
           type="button"
           className="studio-back"
           onClick={() => handleSetView("home")}
         >
-          Back
+          <img className="back-default" src="assets/Back_default.png" alt="Return Button" width={64} height={64} />
+          <img className="back-hover" src="assets/Back_hover.png" alt="Return Button" width={64} height={64} />
         </button>
       )}
 
       {selectedObject && (
         <div className={`studio-popup popup-${selectedObject.position}`}>
           <div className="studio-popup-content">
-            <h3>{selectedObject.label}</h3>
+            <div className="studio-popup-screen">
+              <h1>{selectedObject.label}</h1>
 
-            <div className="studio-popup-inner">
-              {POPUP_COMPONENTS[selectedObject.id] ? (
-                (() => {
-                  const Component = POPUP_COMPONENTS[selectedObject.id];
-                  return <Component />;
-                })()
-              ) : (
-                <p>Content coming soon.</p>
-              )}
+              <div className="studio-popup-inner">
+                {POPUP_COMPONENTS[selectedObject.id] ? (
+                  (() => {
+                    const Component = POPUP_COMPONENTS[selectedObject.id];
+                    return <Component />;
+                  })()
+                ) : (
+                  <p>Content coming soon.</p>
+                )}
+              </div>
+
+              <button type="button" onClick={() => setSelectedObject(null)}>
+                Close
+              </button>
             </div>
-
-            <button type="button" onClick={() => setSelectedObject(null)}>
-              Close
-            </button>
           </div>
         </div>
       )}

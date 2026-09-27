@@ -18,6 +18,10 @@ export const BED_OBJECT_NAMES = new Set([
     "02_Bed.001",
     "02_Bed.002",
     "02_Carpet",
+    "02_Picture",
+    "02_Picture.001",
+    "02_Picture.002",
+    "02_Picture.003",
 ]);
 
 export const LEFT_ROOM_OBJECT_NAMES = new Set([
