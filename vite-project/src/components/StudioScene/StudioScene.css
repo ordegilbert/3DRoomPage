@@ -330,52 +330,68 @@
 }
 
 /* Silent Trip (Chair) */
-.item-02-Chair {
+.item-02-Chair,
+.item-Chair {
   margin-bottom: 80px;
   font-size: 0.75rem;
 }
 
-/* Contact Us (Picture) */
-.item-02-Picture {
+/* Contact Us (Picture / Posters) */
+.item-02-Picture,
+.item-Posters {
   margin-top: 250px;
   font-size: 0.75rem;
 }
 
-/* Press Kit (Canvas) */
-.item-02-Canvas {
+/* Press Kit (Canvas / Standing_Painting / PinBoard) */
+.item-02-Canvas,
+.item-Standing_Painting,
+.item-Standing-Painting,
+.item-PinBoard {
   margin-top: 20px;
   font-size: 0.75rem;
 }
 
 /* About Us (Clock) */
-.item-02-Clock {
+.item-02-Clock,
+.item-Clock {
   margin-top: 50px;
   font-size: 0.6rem;
 }
 
-.item-02-Monitor002 {
+.item-02-Monitor002,
+.item-LandScapeMonitor {
   margin-bottom: -20px;
 }
 
-.in-view.item-02-Clock .hover-icon {
+.in-view.item-02-Clock .hover-icon,
+.in-view.item-Clock .hover-icon {
   width: 0.5rem;
   height: 0.5rem;
 }
 
-.in-view.item-02-Bed {
+.in-view.item-02-Bed,
+.in-view.item-Bed {
   font-size: 0.75rem;
 }
 
-.in-view.item-02-Bed .hover-icon {
+.in-view.item-02-Bed .hover-icon,
+.in-view.item-Bed .hover-icon {
   width: 0.75rem;
   height: 0.75rem;
 }
 
-.in-view.item-02-Canvas {
+.in-view.item-02-Canvas,
+.in-view.item-Standing_Painting,
+.in-view.item-Standing-Painting,
+.in-view.item-PinBoard {
   font-size: 0.5rem;
 }
 
-.in-view.item-02-Canvas .hover-icon {
+.in-view.item-02-Canvas .hover-icon,
+.in-view.item-Standing_Painting .hover-icon,
+.in-view.item-Standing-Painting .hover-icon,
+.in-view.item-PinBoard .hover-icon {
   width: 0.5rem;
   height: 0.5rem;
 }

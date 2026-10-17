@@ -8,8 +8,8 @@ import {
   type RefObject,
 } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useGLTF, useProgress, Html } from "@react-three/drei";
-import { EffectComposer, Vignette, ChromaticAberration } from "@react-three/postprocessing";
+import { useGLTF, useTexture, useProgress, Html, ContactShadows } from "@react-three/drei";
+import { EffectComposer, Vignette, ChromaticAberration, Bloom } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 import "./StudioScene.css";
@@ -19,19 +19,23 @@ import { WishlistPopup } from "../Popups/WishlistPopup";
 
 const POPUP_COMPONENTS: Record<string, React.FC> = {
   "02_Clock": ContactPopup,
-  "02_Monitor002": WishlistPopup
+  "Clock": ContactPopup,
+  "02_Monitor002": WishlistPopup,
+  "LandScapeMonitor": WishlistPopup
 };
 
-const MODEL_URL = "/models/roomModel.glb";
+// const MODEL_URL = "/models/roomModel.glb";
+const MODEL_URL = "/models/TexturedModel/WebsiteTextured.glb";
+const EXTERIOR_TEXTURE_URL = "/models/TexturedModel/textures/Exterior.png";
 
 type NavButton = {
   label: string;
   defaultImg: string;
   hoverImg: string;
 } & (
-  | { action: "zoom"; viewId: ViewId }
-  | { action: "object"; objectId: string; objectLabel: string }
-);
+    | { action: "zoom"; viewId: ViewId }
+    | { action: "object"; objectId: string; objectLabel: string }
+  );
 
 const NAV_BUTTONS: Record<ViewId, NavButton[]> = {
   home: [
@@ -41,19 +45,19 @@ const NAV_BUTTONS: Record<ViewId, NavButton[]> = {
     { label: "About Us", defaultImg: "assets/AboutUs_default.png", hoverImg: "assets/AboutUs_hover.png", action: "zoom", viewId: "clock" },
   ],
   table: [
-    { label: "Wishlist", defaultImg: "assets/Wishlist_default.png", hoverImg: "assets/Wishlist_hover.png", action: "object", objectId: "02_Monitor002", objectLabel: "Wishlist" },
-    { label: "Socials", defaultImg: "assets/Socials_defauly.png", hoverImg: "assets/Socials_hover.png", action: "object", objectId: "02_Phone", objectLabel: "Socials" },
-    { label: "Fan Art", defaultImg: "assets/FanArt_default.png", hoverImg: "assets/FanArt_hover.png", action: "object", objectId: "02_ClipBoard", objectLabel: "Fan Art" },
-    { label: "Press Kit", defaultImg: "assets/PressKit_default.png", hoverImg: "assets/PressKit_hover.png", action: "object", objectId: "02_Drawing_Tablet", objectLabel: "Press Kit" },
+    { label: "Wishlist", defaultImg: "assets/Wishlist_default.png", hoverImg: "assets/Wishlist_hover.png", action: "object", objectId: "LandScapeMonitor", objectLabel: "Wishlist" },
+    { label: "Socials", defaultImg: "assets/Socials_defauly.png", hoverImg: "assets/Socials_hover.png", action: "object", objectId: "Phone", objectLabel: "Socials" },
+    { label: "Fan Art", defaultImg: "assets/FanArt_default.png", hoverImg: "assets/FanArt_hover.png", action: "object", objectId: "ClipBoard", objectLabel: "Fan Art" },
+    { label: "Press Kit", defaultImg: "assets/PressKit_default.png", hoverImg: "assets/PressKit_hover.png", action: "object", objectId: "DrawingTablet", objectLabel: "Press Kit" },
   ],
   bed: [
-    { label: "Contact Us", defaultImg: "assets/ContactUs_default.png", hoverImg: "assets/ContactUs_hover.png", action: "object", objectId: "02_Bed", objectLabel: "Contact Us" },
+    { label: "Contact Us", defaultImg: "assets/ContactUs_default.png", hoverImg: "assets/ContactUs_hover.png", action: "object", objectId: "Bed", objectLabel: "Contact Us" },
   ],
   pinboard: [
-    { label: "Press Kit", defaultImg: "assets/PressKit_default.png", hoverImg: "assets/PressKit_hover.png", action: "object", objectId: "02_Canvas", objectLabel: "Press Kit" },
+    { label: "Press Kit", defaultImg: "assets/PressKit_default.png", hoverImg: "assets/PressKit_hover.png", action: "object", objectId: "Standing_Painting", objectLabel: "Press Kit" },
   ],
   clock: [
-    { label: "About Us", defaultImg: "assets/AboutUs_default.png", hoverImg: "assets/AboutUs_hover.png", action: "object", objectId: "02_Clock", objectLabel: "About Us" },
+    { label: "About Us", defaultImg: "assets/AboutUs_default.png", hoverImg: "assets/AboutUs_hover.png", action: "object", objectId: "Clock", objectLabel: "About Us" },
   ],
 };
 
@@ -97,6 +101,7 @@ const VIEWS: Record<ViewId, { position: [number, number, number]; target: [numbe
 };
 
 useGLTF.preload(MODEL_URL);
+useTexture.preload(EXTERIOR_TEXTURE_URL);
 
 function objectMatches(object: THREE.Object3D, group: Set<string>) {
   let current: THREE.Object3D | null = object;
@@ -119,13 +124,45 @@ function Room({
   isLoaded: boolean;
 }) {
   const { scene } = useGLTF(MODEL_URL);
+  const exteriorTexture = useTexture(EXTERIOR_TEXTURE_URL);
 
   useLayoutEffect(() => {
+    exteriorTexture.flipY = false;
+    exteriorTexture.colorSpace = THREE.SRGBColorSpace;
+
     scene.traverse((obj) => {
-      obj.castShadow = true;
-      obj.receiveShadow = true;
+      if ((obj as THREE.Mesh).isMesh) {
+        const mesh = obj as THREE.Mesh;
+
+        // Floor, walls, and road must RECEIVE shadows, but NOT cast shadows onto the interior
+        if (
+          obj.name === "FloorEdge" ||
+          obj.name === "Carpet" ||
+          obj.name === "Road" ||
+          obj.name.startsWith("ExteriorHouse")
+        ) {
+          mesh.castShadow = false;
+          mesh.receiveShadow = true;
+        } else {
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+        }
+
+        const applyTexture = (mat: THREE.Material) => {
+          if (mat.name === "Exterior" || obj.name.startsWith("ExteriorHouse")) {
+            (mat as THREE.MeshStandardMaterial).map = exteriorTexture;
+            mat.needsUpdate = true;
+          }
+        };
+
+        if (Array.isArray(mesh.material)) {
+          mesh.material.forEach(applyTexture);
+        } else if (mesh.material) {
+          applyTexture(mesh.material);
+        }
+      }
     });
-  }, [scene]);
+  }, [scene, exteriorTexture]);
 
   const activeObjects = useMemo(() => {
     const roomCenter = new THREE.Vector3(1.75, 2.5, -28.4);
@@ -134,9 +171,13 @@ function Room({
     if (view === "home") {
       const homeLabels: Record<string, { label: string, view: ViewId }> = {
         "02_Chair": { label: "Silent Trip", view: "table" },
+        "Chair": { label: "Silent Trip", view: "table" },
         "02_Picture": { label: "Contact Us", view: "bed" },
+        "Posters": { label: "Contact Us", view: "bed" },
         "02_Canvas": { label: "Press Kit", view: "pinboard" },
-        "02_Clock": { label: "About Us", view: "clock" }
+        "Standing_Painting": { label: "Press Kit", view: "pinboard" },
+        "02_Clock": { label: "About Us", view: "clock" },
+        "Clock": { label: "About Us", view: "clock" }
       };
       const list: { name: string; label: string; position: [number, number, number]; rotation: [number, number, number]; viewId?: ViewId }[] = [];
       scene.traverse((obj) => {
@@ -388,6 +429,11 @@ function CameraEffects({ cameraVelocityRef }: { cameraVelocityRef: RefObject<num
         radialModulation={false}
         modulationOffset={0.0}
       />
+      <Bloom
+        luminanceThreshold={0.85}
+        intensity={0.35}
+        mipmapBlur
+      />
     </EffectComposer>
   );
 }
@@ -475,6 +521,18 @@ export function StudioScene() {
   const [isLoaded, setIsLoaded] = useState(false);
   const handleLoaded = useMemo(() => () => setIsLoaded(true), []);
 
+  const sunTarget = useMemo(() => {
+    const t = new THREE.Object3D();
+    t.position.set(1.75, 2.5, -28.4);
+    return t;
+  }, []);
+
+  const ceilingLampTarget = useMemo(() => {
+    const t = new THREE.Object3D();
+    t.position.set(1.75, 2.46, -28.7);
+    return t;
+  }, []);
+
   function handleSetView(newView: ViewId) {
     setView(newView);
     setSelectedObject(null);
@@ -513,8 +571,13 @@ export function StudioScene() {
       onPointerLeave={() => setEdges(null, null, 0, 0)}
     >
       <Canvas
+        shadows
         dpr={[1, 1.5]}
-        gl={{ antialias: true }}
+        gl={{
+          antialias: true,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.15,
+        }}
         camera={{
           fov: 55,
           near: 0.05,
@@ -535,9 +598,73 @@ export function StudioScene() {
         <color attach="background" args={["#b7ddff"]} />
         <fog attach="fog" args={["#b7ddff", 12, 40]} />
 
-        <ambientLight intensity={0.55} />
-        <hemisphereLight args={["#e7f3ff", "#8a7a68", 0.7]} />
-        <directionalLight position={[6, 12, -18]} intensity={1.15} />
+        {/* Ambient & Sky Bounce (calibrated for high shadow contrast) */}
+        <ambientLight intensity={0.25} />
+        <hemisphereLight args={["#dbeaff", "#45382b", 0.4]} />
+
+        {/* Directional Sunlight through the Window */}
+        <primitive object={sunTarget} />
+        <directionalLight
+          castShadow
+          target={sunTarget}
+          position={[3.8, 5.8, -21.5]}
+          intensity={2.2}
+          color="#fff4df"
+          shadow-mapSize={[2048, 2048]}
+          shadow-bias={-0.0003}
+          shadow-camera-near={0.5}
+          shadow-camera-far={25}
+          shadow-camera-left={-4}
+          shadow-camera-right={4}
+          shadow-camera-top={4}
+          shadow-camera-bottom={-4}
+        />
+
+        {/* Top-room Ceiling Lamp casting downward floor shadows */}
+        <primitive object={ceilingLampTarget} />
+        <directionalLight
+          castShadow
+          target={ceilingLampTarget}
+          position={[1.75, 3.65, -28.7]}
+          intensity={1.9}
+          color="#fff5e8"
+          shadow-mapSize={[2048, 2048]}
+          shadow-bias={-0.0004}
+          shadow-camera-near={0.1}
+          shadow-camera-far={2.5}
+          shadow-camera-left={-2.2}
+          shadow-camera-right={2.2}
+          shadow-camera-top={2.2}
+          shadow-camera-bottom={-2.2}
+        />
+
+        {/* Soft Warm Indoor Room / Ceiling Fill */}
+        <pointLight
+          position={[1.75, 3.6, -28.7]}
+          intensity={0.6}
+          color="#fff4ea"
+          distance={6}
+          decay={2}
+        />
+
+        {/* Monitor Screen Glow onto the Desk & Keyboard */}
+        <pointLight
+          position={[1.75, 2.85, -28.3]}
+          intensity={0.3}
+          color="#7ec8ff"
+          distance={1.6}
+          decay={1}
+        />
+
+        {/* Soft Ambient Contact Shadows directly on top of the floor */}
+        <ContactShadows
+          position={[1.75, 2.462, -28.6]}
+          opacity={0.8}
+          scale={9}
+          blur={2.0}
+          far={3.0}
+          color="#15171e"
+        />
 
         <Suspense fallback={null}>
           <Room
