@@ -3,6 +3,10 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .studio-root.edge-left {
@@ -233,6 +237,10 @@
   width: 100%;
 }
 
+.studio-popup-close-x {
+  display: none;
+}
+
 .studio-popup-content button {
   border: 0;
   border-radius: 999px;
@@ -339,7 +347,8 @@
 /* Contact Us (Picture / Posters) */
 .item-02-Picture,
 .item-Posters {
-  margin-top: 250px;
+  margin-top: 220px;
+  margin-right: 150px;
   font-size: 0.75rem;
 }
 
@@ -394,4 +403,135 @@
 .in-view.item-PinBoard .hover-icon {
   width: 0.5rem;
   height: 0.5rem;
+}
+
+/* ── Mobile Layout (< 768px): Full Screen Popup & Mobile Optimization ── */
+@media (max-width: 768px) {
+
+  .studio-popup,
+  .studio-popup.popup-left,
+  .studio-popup.popup-right {
+    justify-content: center;
+    align-items: stretch;
+    padding: 0;
+    background: rgba(10, 15, 26, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: auto;
+  }
+
+  .studio-popup-content {
+    width: 100%;
+    height: 100%;
+    max-width: 100vw;
+    max-height: 100dvh;
+    aspect-ratio: unset;
+    background: #ffffff;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    animation: mobilePopupSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .studio-popup-close-x {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: calc(14px + env(safe-area-inset-top, 0px));
+    right: 16px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .studio-popup-close-x:active {
+    background: #e2e8f0;
+    transform: scale(0.95);
+  }
+
+  .studio-popup-screen {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    gap: 16px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .studio-popup-content h1 {
+    margin: 12px 0 6px 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    text-align: center;
+  }
+
+  .studio-popup-inner {
+    width: 100%;
+    max-width: 500px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .studio-popup-content button:not(.studio-popup-close-x) {
+    width: min(100%, 320px);
+    padding: 13px 24px;
+    font-size: 0.95rem;
+    margin-top: auto;
+    margin-bottom: 6px;
+    border-radius: 9999px;
+  }
+
+  /* Responsive top navigation for small screens */
+  .studio-nav {
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    left: 12px;
+    right: 12px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .studio-nav-btn img {
+    width: clamp(56px, 18vw, 84px);
+  }
+
+  .studio-back {
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .studio-back img {
+    width: 52px;
+    height: 52px;
+  }
+}
+
+@keyframes mobilePopupSlide {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

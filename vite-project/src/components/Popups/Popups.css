@@ -54,3 +54,19 @@
 .popup-body li a:hover {
   text-decoration: underline;
 }
+
+.popup-body iframe {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .popup-body {
+    font-size: 1.05rem;
+  }
+
+  .popup-body .media-embed {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+}

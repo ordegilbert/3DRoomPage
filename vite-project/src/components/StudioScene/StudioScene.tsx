@@ -117,11 +117,13 @@ function Room({
   onZoom,
   onObjectClick,
   isLoaded,
+  isDraggingRef,
 }: {
   view: ViewId;
   onZoom: (viewId: ViewId) => void;
   onObjectClick: (obj: { id: string; label: string; position: "left" | "right" }) => void;
   isLoaded: boolean;
+  isDraggingRef: RefObject<boolean>;
 }) {
   const { scene } = useGLTF(MODEL_URL);
   const exteriorTexture = useTexture(EXTERIOR_TEXTURE_URL);
@@ -232,6 +234,7 @@ function Room({
       <primitive
         object={scene}
         onClick={(event: any) => {
+          if (isDraggingRef.current) return;
           if (view === "home") {
             if (objectMatches(event.object, TABLE_OBJECT_NAMES)) {
               event.stopPropagation();
@@ -272,6 +275,7 @@ function Room({
           <div
             className={`floating-icon item-${item.name.replace(/[^a-zA-Z0-9]/g, '-')}${view !== "home" ? " in-view" : ""}`}
             onClick={(e) => {
+              if (isDraggingRef.current) return;
               e.stopPropagation();
               if (view === "home" && item.viewId) {
                 onZoom(item.viewId);
@@ -521,6 +525,11 @@ export function StudioScene() {
   const [isLoaded, setIsLoaded] = useState(false);
   const handleLoaded = useMemo(() => () => setIsLoaded(true), []);
 
+  const isDraggingRef = useRef(false);
+  const isPointerDownRef = useRef(false);
+  const pointerStartRef = useRef({ x: 0, y: 0 });
+  const lastPointerPosRef = useRef({ x: 0, y: 0 });
+
   const sunTarget = useMemo(() => {
     const t = new THREE.Object3D();
     t.position.set(1.75, 2.5, -28.4);
@@ -555,20 +564,105 @@ export function StudioScene() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  useEffect(() => {
+    function onGlobalPointerUp() {
+      isPointerDownRef.current = false;
+      if (isDraggingRef.current) {
+        setTimeout(() => {
+          isDraggingRef.current = false;
+        }, 60);
+      }
+    }
+    window.addEventListener("pointerup", onGlobalPointerUp);
+    window.addEventListener("pointercancel", onGlobalPointerUp);
+    return () => {
+      window.removeEventListener("pointerup", onGlobalPointerUp);
+      window.removeEventListener("pointercancel", onGlobalPointerUp);
+    };
+  }, []);
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (selectedObject) return;
+    isPointerDownRef.current = true;
+    pointerStartRef.current = { x: event.clientX, y: event.clientY };
+    lastPointerPosRef.current = { x: event.clientX, y: event.clientY };
+    isDraggingRef.current = false;
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (selectedObject || (view !== "home" && view !== "table")) {
+      setEdges(null, null, 0, 0);
+      return;
+    }
+
+    // Preserve existing edge panning for mouse interaction when not actively dragging
+    if (event.pointerType === "mouse" && !isDraggingRef.current) {
+      const { edgeX, edgeY, ix, iy } = getPanIntensity(event.clientX, event.clientY);
+      setEdges(edgeX, edgeY, ix, iy);
+    }
+
+    // Drag-to-pan when touch or pointer is pressed down
+    if (isPointerDownRef.current) {
+      const dx = event.clientX - lastPointerPosRef.current.x;
+      const dy = event.clientY - lastPointerPosRef.current.y;
+      const distFromStart = Math.hypot(
+        event.clientX - pointerStartRef.current.x,
+        event.clientY - pointerStartRef.current.y
+      );
+
+      if (distFromStart > 6) {
+        isDraggingRef.current = true;
+        if (edgeXRef.current || edgeYRef.current) {
+          setEdges(null, null, 0, 0);
+        }
+      }
+
+      if (isDraggingRef.current) {
+        const sensitivityX = (MAX_YAW * 2) / (window.innerWidth * 1.2);
+        yawRef.current = THREE.MathUtils.clamp(
+          yawRef.current + dx * sensitivityX,
+          -MAX_YAW,
+          MAX_YAW
+        );
+
+        if (view === "home") {
+          const sensitivityY = (MAX_PITCH * 2) / (window.innerHeight * 1.2);
+          pitchRef.current = THREE.MathUtils.clamp(
+            pitchRef.current + dy * sensitivityY,
+            -MAX_PITCH,
+            MAX_PITCH
+          );
+        }
+      }
+
+      lastPointerPosRef.current = { x: event.clientX, y: event.clientY };
+    }
+  };
+
+  const handlePointerUp = () => {
+    isPointerDownRef.current = false;
+    if (isDraggingRef.current) {
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 60);
+    }
+  };
+
+  const handlePointerLeave = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "mouse") {
+      setEdges(null, null, 0, 0);
+    }
+  };
+
   const atHome = view === "home";
 
   return (
     <div
       className={`studio-root ${atHome && edgeX ? `edge-${edgeX}` : ""} ${atHome && edgeY ? `edge-${edgeY}` : ""}`}
-      onPointerMove={(event) => {
-        if (selectedObject || (view !== "home" && view !== "table")) {
-          setEdges(null, null, 0, 0);
-          return;
-        }
-        const { edgeX, edgeY, ix, iy } = getPanIntensity(event.clientX, event.clientY);
-        setEdges(edgeX, edgeY, ix, iy);
-      }}
-      onPointerLeave={() => setEdges(null, null, 0, 0)}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerLeave}
     >
       <Canvas
         shadows
@@ -588,6 +682,7 @@ export function StudioScene() {
           camera.lookAt(...CAMERA_TARGET);
         }}
         onPointerMissed={() => {
+          if (isDraggingRef.current) return;
           if (view !== "home") {
             setSelectedObject(null);
           } else {
@@ -672,6 +767,7 @@ export function StudioScene() {
             onZoom={(v) => handleSetView(v)}
             onObjectClick={(obj) => setSelectedObject(obj)}
             isLoaded={isLoaded}
+            isDraggingRef={isDraggingRef}
           />
         </Suspense>
 
@@ -728,8 +824,23 @@ export function StudioScene() {
       )}
 
       {selectedObject && (
-        <div className={`studio-popup popup-${selectedObject.position}`}>
+        <div
+          className={`studio-popup popup-${selectedObject.position}`}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelectedObject(null);
+            }
+          }}
+        >
           <div className="studio-popup-content">
+            <button
+              type="button"
+              className="studio-popup-close-x"
+              aria-label="Close"
+              onClick={() => setSelectedObject(null)}
+            >
+              ✕
+            </button>
             <div className="studio-popup-screen">
               <h1>{selectedObject.label}</h1>
 
