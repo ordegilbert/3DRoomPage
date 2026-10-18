@@ -39,25 +39,25 @@ type NavButton = {
 
 const NAV_BUTTONS: Record<ViewId, NavButton[]> = {
   home: [
-    { label: "Silent Trip", defaultImg: "assets/SilentTrip_default.png", hoverImg: "assets/SilentTrip_hover.png", action: "zoom", viewId: "table" },
-    { label: "Contact Us", defaultImg: "assets/ContactUs_default.png", hoverImg: "assets/ContactUs_hover.png", action: "zoom", viewId: "bed" },
-    { label: "Press Kit", defaultImg: "assets/PressKit_default.png", hoverImg: "assets/PressKit_hover.png", action: "zoom", viewId: "pinboard" },
-    { label: "About Us", defaultImg: "assets/AboutUs_default.png", hoverImg: "assets/AboutUs_hover.png", action: "zoom", viewId: "clock" },
+    { label: "Silent Trip", defaultImg: "/assets/SilentTrip_default.png", hoverImg: "/assets/SilentTrip_hover.png", action: "zoom", viewId: "table" },
+    { label: "Contact Us", defaultImg: "/assets/ContactUs_default.png", hoverImg: "/assets/ContactUs_hover.png", action: "zoom", viewId: "bed" },
+    { label: "Press Kit", defaultImg: "/assets/PressKit_default.png", hoverImg: "/assets/PressKit_hover.png", action: "zoom", viewId: "pinboard" },
+    { label: "About Us", defaultImg: "/assets/AboutUs_default.png", hoverImg: "/assets/AboutUs_hover.png", action: "zoom", viewId: "clock" },
   ],
   table: [
-    { label: "Wishlist", defaultImg: "assets/Wishlist_default.png", hoverImg: "assets/Wishlist_hover.png", action: "object", objectId: "LandScapeMonitor", objectLabel: "Wishlist" },
-    { label: "Socials", defaultImg: "assets/Socials_defauly.png", hoverImg: "assets/Socials_hover.png", action: "object", objectId: "Phone", objectLabel: "Socials" },
-    { label: "Fan Art", defaultImg: "assets/FanArt_default.png", hoverImg: "assets/FanArt_hover.png", action: "object", objectId: "ClipBoard", objectLabel: "Fan Art" },
-    { label: "Press Kit", defaultImg: "assets/PressKit_default.png", hoverImg: "assets/PressKit_hover.png", action: "object", objectId: "DrawingTablet", objectLabel: "Press Kit" },
+    { label: "Wishlist", defaultImg: "/assets/Wishlist_default.png", hoverImg: "/assets/Wishlist_hover.png", action: "object", objectId: "LandScapeMonitor", objectLabel: "Wishlist" },
+    { label: "Socials", defaultImg: "/assets/Socials_defauly.png", hoverImg: "/assets/Socials_hover.png", action: "object", objectId: "Phone", objectLabel: "Socials" },
+    { label: "Fan Art", defaultImg: "/assets/FanArt_default.png", hoverImg: "/assets/FanArt_hover.png", action: "object", objectId: "ClipBoard", objectLabel: "Fan Art" },
+    { label: "Press Kit", defaultImg: "/assets/PressKit_default.png", hoverImg: "/assets/PressKit_hover.png", action: "object", objectId: "DrawingTablet", objectLabel: "Press Kit" },
   ],
   bed: [
-    { label: "Contact Us", defaultImg: "assets/ContactUs_default.png", hoverImg: "assets/ContactUs_hover.png", action: "object", objectId: "Bed", objectLabel: "Contact Us" },
+    { label: "Contact Us", defaultImg: "/assets/ContactUs_default.png", hoverImg: "/assets/ContactUs_hover.png", action: "object", objectId: "Bed", objectLabel: "Contact Us" },
   ],
   pinboard: [
-    { label: "Press Kit", defaultImg: "assets/PressKit_default.png", hoverImg: "assets/PressKit_hover.png", action: "object", objectId: "Standing_Painting", objectLabel: "Press Kit" },
+    { label: "Press Kit", defaultImg: "/assets/PressKit_default.png", hoverImg: "/assets/PressKit_hover.png", action: "object", objectId: "Standing_Painting", objectLabel: "Press Kit" },
   ],
   clock: [
-    { label: "About Us", defaultImg: "assets/AboutUs_default.png", hoverImg: "assets/AboutUs_hover.png", action: "object", objectId: "Clock", objectLabel: "About Us" },
+    { label: "About Us", defaultImg: "/assets/AboutUs_default.png", hoverImg: "/assets/AboutUs_hover.png", action: "object", objectId: "Clock", objectLabel: "About Us" },
   ],
 };
 
@@ -271,7 +271,7 @@ function Room({
         }}
       />
       {isLoaded && activeObjects.map((item, i) => (
-        <Html key={i} position={item.position} sprite center transform distanceFactor={1.5} zIndexRange={[100, 0]} style={{ pointerEvents: "auto" }}>
+        <Html key={i} position={item.position} sprite center transform distanceFactor={6} zIndexRange={[100, 0]} style={{ pointerEvents: "auto" }}>
           <div
             className={`floating-icon item-${item.name.replace(/[^a-zA-Z0-9]/g, '-')}${view !== "home" ? " in-view" : ""}`}
             onClick={(e) => {
@@ -327,6 +327,8 @@ function CameraRig({
 
   const prevViewRef = useRef<ViewId>(view);
   const transitionProgress = useRef(1);
+  const smoothYawRef = useRef(0);
+  const smoothPitchRef = useRef(0);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
@@ -359,17 +361,22 @@ function CameraRig({
         pitchRef.current *= 1 - Math.min(1, dt * 3);
       }
 
+      // Smooth yaw and pitch values to eliminate touch stutter / choppy discrete steps
+      const smoothFactor = 1 - Math.exp(-15 * dt);
+      smoothYawRef.current = THREE.MathUtils.lerp(smoothYawRef.current, yawRef.current, smoothFactor);
+      smoothPitchRef.current = THREE.MathUtils.lerp(smoothPitchRef.current, pitchRef.current, smoothFactor);
+
       const baseNext = VIEWS[view];
       const basePos = new THREE.Vector3(...baseNext.position);
       const baseTarget = new THREE.Vector3(...baseNext.target);
       const baseDir = new THREE.Vector3().subVectors(baseTarget, basePos);
 
       desiredPos.copy(basePos);
-      desiredLook.copy(baseDir).applyAxisAngle(UP, yawRef.current);
+      desiredLook.copy(baseDir).applyAxisAngle(UP, smoothYawRef.current);
 
       if (view === "home") {
         const right = new THREE.Vector3().crossVectors(desiredLook, UP).normalize();
-        desiredLook.applyAxisAngle(right, pitchRef.current);
+        desiredLook.applyAxisAngle(right, smoothPitchRef.current);
       }
 
       desiredLook.add(desiredPos);
@@ -377,6 +384,8 @@ function CameraRig({
       // Smoothly decay yaw/pitch so returning to home doesn't jerk
       yawRef.current *= 1 - Math.min(1, dt * 3);
       pitchRef.current *= 1 - Math.min(1, dt * 3);
+      smoothYawRef.current *= 1 - Math.min(1, dt * 3);
+      smoothPitchRef.current *= 1 - Math.min(1, dt * 3);
 
       const next = VIEWS[view];
       desiredPos.set(...next.position);
@@ -583,6 +592,9 @@ export function StudioScene() {
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (selectedObject) return;
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {}
     isPointerDownRef.current = true;
     pointerStartRef.current = { x: event.clientX, y: event.clientY };
     lastPointerPosRef.current = { x: event.clientX, y: event.clientY };
@@ -618,7 +630,8 @@ export function StudioScene() {
       }
 
       if (isDraggingRef.current) {
-        const sensitivityX = (MAX_YAW * 2) / (window.innerWidth * 1.2);
+        const isMobile = window.innerWidth < 768;
+        const sensitivityX = (MAX_YAW * (isMobile ? 1.4 : 2)) / (window.innerWidth * (isMobile ? 1.6 : 1.2));
         yawRef.current = THREE.MathUtils.clamp(
           yawRef.current + dx * sensitivityX,
           -MAX_YAW,
@@ -626,7 +639,7 @@ export function StudioScene() {
         );
 
         if (view === "home") {
-          const sensitivityY = (MAX_PITCH * 2) / (window.innerHeight * 1.2);
+          const sensitivityY = (MAX_PITCH * (isMobile ? 1.4 : 2)) / (window.innerHeight * (isMobile ? 1.6 : 1.2));
           pitchRef.current = THREE.MathUtils.clamp(
             pitchRef.current + dy * sensitivityY,
             -MAX_PITCH,
@@ -639,7 +652,12 @@ export function StudioScene() {
     }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    } catch {}
     isPointerDownRef.current = false;
     if (isDraggingRef.current) {
       setTimeout(() => {
@@ -818,8 +836,8 @@ export function StudioScene() {
           className="studio-back"
           onClick={() => handleSetView("home")}
         >
-          <img className="back-default" src="assets/Back_default.png" alt="Return Button" width={64} height={64} />
-          <img className="back-hover" src="assets/Back_hover.png" alt="Return Button" width={64} height={64} />
+          <img className="back-default" src="/assets/Back_default.png" alt="Return Button" width={64} height={64} />
+          <img className="back-hover" src="/assets/Back_hover.png" alt="Return Button" width={64} height={64} />
         </button>
       )}
 

@@ -95,6 +95,13 @@
 }
 
 /* Default image visible, hover image hidden */
+.studio-back img {
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
 .studio-back .back-default {
   display: block;
 }
@@ -103,13 +110,14 @@
   display: none;
 }
 
-/* On hover: swap the images */
-.studio-back:hover .back-default {
-  display: none;
-}
+@media (hover: hover) {
+  .studio-back:hover .back-default {
+    display: none;
+  }
 
-.studio-back:hover .back-hover {
-  display: block;
+  .studio-back:hover .back-hover {
+    display: block;
+  }
 }
 
 /* ── Top-left navigation buttons ── */
@@ -130,11 +138,16 @@
   padding: 0;
   cursor: pointer;
   animation: navSlideIn 0.3s ease-out both;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .studio-nav-btn img {
   width: 128px;
   height: auto;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 .studio-nav-btn .nav-default {
@@ -145,12 +158,14 @@
   display: none;
 }
 
-.studio-nav-btn:hover .nav-default {
-  display: none;
-}
+@media (hover: hover) {
+  .studio-nav-btn:hover .nav-default {
+    display: none;
+  }
 
-.studio-nav-btn:hover .nav-hover {
-  display: block;
+  .studio-nav-btn:hover .nav-hover {
+    display: block;
+  }
 }
 
 @keyframes navFadeIn {
@@ -271,19 +286,18 @@
 }
 
 .hover-icon {
-  width: 1rem;
-  height: 1rem;
+  width: 3.2rem;
+  height: 3.2rem;
   /* explicit height needed for mask */
   background-color: white;
-  /* Change this to whatever color you want! */
   -webkit-mask: url('/assets/mouse-button-left.svg') no-repeat center / contain;
   mask: url('/assets/mouse-button-left.svg') no-repeat center / contain;
 }
 
-/* Smaller icon when inside a zoomed-in view */
+/* Crisp icon when inside a zoomed-in view */
 .in-view .hover-icon {
-  width: 0.2rem;
-  height: 0.2rem;
+  width: 2.2rem;
+  height: 2.2rem;
 }
 
 .floating-icon {
@@ -293,20 +307,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 8px;
   font-family: inherit;
-  font-size: 0.2rem;
+  font-size: 2.8rem;
   font-weight: 700;
   color: white;
   box-shadow: none;
   pointer-events: auto;
   cursor: pointer;
   white-space: nowrap;
-  /* animation: floatUpDown 2s ease-in-out infinite; */
   backdrop-filter: none;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.8), 0 0 6px rgba(0, 0, 0, 0.6);
   margin-bottom: 20px;
   position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.floating-icon.in-view {
+  font-size: 2.2rem;
 }
 
 .floating-icon:hover .text {
@@ -326,7 +346,6 @@
 }
 
 @keyframes floatUpDown {
-
   0%,
   100% {
     translate: 0 0;
@@ -341,7 +360,7 @@
 .item-02-Chair,
 .item-Chair {
   margin-bottom: 80px;
-  font-size: 0.75rem;
+  font-size: 2.8rem;
 }
 
 /* Contact Us (Picture / Posters) */
@@ -349,7 +368,7 @@
 .item-Posters {
   margin-top: 220px;
   margin-right: 150px;
-  font-size: 0.75rem;
+  font-size: 2.8rem;
 }
 
 /* Press Kit (Canvas / Standing_Painting / PinBoard) */
@@ -358,14 +377,14 @@
 .item-Standing-Painting,
 .item-PinBoard {
   margin-top: 20px;
-  font-size: 0.75rem;
+  font-size: 2.8rem;
 }
 
 /* About Us (Clock) */
 .item-02-Clock,
 .item-Clock {
   margin-top: 50px;
-  font-size: 0.6rem;
+  font-size: 2.4rem;
 }
 
 .item-02-Monitor002,
@@ -373,47 +392,64 @@
   margin-bottom: -20px;
 }
 
+/* Sizing for zoomed-in table items */
+.in-view.item-LandScapeMonitor,
+.in-view.item-02-Monitor002,
+.in-view.item-Phone,
+.in-view.item-02-Phone,
+.in-view.item-ClipBoard,
+.in-view.item-02-ClipBoard,
+.in-view.item-DrawingTablet,
+.in-view.item-02-Drawing_Tablet {
+  font-size: 2.2rem;
+}
+
+.in-view.item-02-Clock,
+.in-view.item-Clock {
+  font-size: 2.2rem;
+}
+
 .in-view.item-02-Clock .hover-icon,
 .in-view.item-Clock .hover-icon {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 2.2rem;
+  height: 2.2rem;
 }
 
 .in-view.item-02-Bed,
 .in-view.item-Bed {
-  font-size: 0.75rem;
+  font-size: 2.2rem;
 }
 
 .in-view.item-02-Bed .hover-icon,
 .in-view.item-Bed .hover-icon {
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 2.2rem;
+  height: 2.2rem;
 }
 
 .in-view.item-02-Canvas,
 .in-view.item-Standing_Painting,
 .in-view.item-Standing-Painting,
 .in-view.item-PinBoard {
-  font-size: 0.5rem;
+  font-size: 2.2rem;
 }
 
 .in-view.item-02-Canvas .hover-icon,
 .in-view.item-Standing_Painting .hover-icon,
 .in-view.item-Standing-Painting .hover-icon,
 .in-view.item-PinBoard .hover-icon {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 2.2rem;
+  height: 2.2rem;
 }
 
-/* ── Mobile Layout (< 768px): Full Screen Popup & Mobile Optimization ── */
+/* ── Mobile Layout (< 768px): Mobile Phone Frame & Responsive Optimization ── */
 @media (max-width: 768px) {
 
   .studio-popup,
   .studio-popup.popup-left,
   .studio-popup.popup-right {
     justify-content: center;
-    align-items: stretch;
-    padding: 0;
+    align-items: center;
+    padding: 12px;
     background: rgba(10, 15, 26, 0.75);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -421,63 +457,44 @@
   }
 
   .studio-popup-content {
-    width: 100%;
-    height: 100%;
-    max-width: 100vw;
-    max-height: 100dvh;
-    aspect-ratio: unset;
-    background: #ffffff;
-    border-radius: 0;
-    box-shadow: none;
+    /* Keep using the mobile phone frame, leave small gaps on the edges of the pop up */
+    position: relative;
+    width: min(calc(100vw - 24px), calc((100dvh - 28px) * 9 / 16));
+    max-width: 420px;
+    height: auto;
+    aspect-ratio: 9 / 16;
+    background: url('/assets/Phone.png') center / contain no-repeat;
     display: flex;
     flex-direction: column;
-    animation: mobilePopupSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: auto;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .studio-popup-close-x {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: calc(14px + env(safe-area-inset-top, 0px));
-    right: 16px;
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #f1f5f9;
-    color: #334155;
-    font-size: 1.1rem;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    z-index: 10;
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  .studio-popup-close-x:active {
-    background: #e2e8f0;
-    transform: scale(0.95);
+    display: none;
   }
 
   .studio-popup-screen {
     position: absolute;
-    inset: 0;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 7.2%;
+    left: 7.2%;
+    right: 7.2%;
+    bottom: 5.5%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: calc(20px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px));
-    gap: 16px;
+    padding: 10px 8px 6px;
+    gap: 6px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
 
   .studio-popup-content h1 {
-    margin: 12px 0 6px 0;
-    font-size: 1.5rem;
+    margin: 8px 0 4px 0;
+    font-size: 1.15rem;
     font-weight: 800;
     color: #0f172a;
     text-align: center;
@@ -485,7 +502,6 @@
 
   .studio-popup-inner {
     width: 100%;
-    max-width: 500px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -493,11 +509,12 @@
   }
 
   .studio-popup-content button:not(.studio-popup-close-x) {
-    width: min(100%, 320px);
-    padding: 13px 24px;
-    font-size: 0.95rem;
+    width: auto;
+    min-width: 90px;
+    padding: 6px 18px;
+    font-size: 0.8rem;
     margin-top: auto;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     border-radius: 9999px;
   }
 
@@ -512,6 +529,8 @@
 
   .studio-nav-btn img {
     width: clamp(56px, 18vw, 84px);
+    height: auto;
+    display: block;
   }
 
   .studio-back {
@@ -521,17 +540,5 @@
   .studio-back img {
     width: 52px;
     height: 52px;
-  }
-}
-
-@keyframes mobilePopupSlide {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
