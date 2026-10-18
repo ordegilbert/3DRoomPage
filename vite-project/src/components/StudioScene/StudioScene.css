@@ -53,6 +53,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
   background-color: #b11129;
   /* Darker red background */
   background-image:
@@ -62,10 +64,24 @@
   background-position: 0 0, 0 0, 6px 6px;
   background-size: 100% 100%, 12px 12px, 12px 12px;
   color: white;
-  font-family: inherit;
-  font-size: 6rem;
   pointer-events: none;
   z-index: 2;
+}
+
+.studio-loader > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 540px);
+  max-width: 100%;
+}
+
+.studio-loader img {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .studio-loader.fade-out {
@@ -286,18 +302,19 @@
 }
 
 .hover-icon {
-  width: 3.2rem;
-  height: 3.2rem;
+  width: 3rem;
+  height: 3rem;
   /* explicit height needed for mask */
   background-color: white;
+  /* Change this to whatever color you want! */
   -webkit-mask: url('/assets/mouse-button-left.svg') no-repeat center / contain;
   mask: url('/assets/mouse-button-left.svg') no-repeat center / contain;
 }
 
-/* Crisp icon when inside a zoomed-in view */
+/* Smaller icon when inside a zoomed-in view */
 .in-view .hover-icon {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 0.6rem;
+  height: 0.6rem;
 }
 
 .floating-icon {
@@ -307,26 +324,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
   font-family: inherit;
-  font-size: 2.8rem;
+  font-size: 0.6rem;
   font-weight: 700;
   color: white;
   box-shadow: none;
   pointer-events: auto;
   cursor: pointer;
   white-space: nowrap;
+  /* animation: floatUpDown 2s ease-in-out infinite; */
   backdrop-filter: none;
-  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.8), 0 0 6px rgba(0, 0, 0, 0.6);
-  margin-bottom: 20px;
+  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+  margin-bottom: 60px;
   position: relative;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-.floating-icon.in-view {
-  font-size: 2.2rem;
 }
 
 .floating-icon:hover .text {
@@ -346,6 +357,7 @@
 }
 
 @keyframes floatUpDown {
+
   0%,
   100% {
     translate: 0 0;
@@ -359,16 +371,16 @@
 /* Silent Trip (Chair) */
 .item-02-Chair,
 .item-Chair {
-  margin-bottom: 80px;
-  font-size: 2.8rem;
+  margin-bottom: 240px;
+  font-size: 2.25rem;
 }
 
 /* Contact Us (Picture / Posters) */
 .item-02-Picture,
 .item-Posters {
-  margin-top: 220px;
-  margin-right: 150px;
-  font-size: 2.8rem;
+  margin-top: 660px;
+  margin-right: 450px;
+  font-size: 2.25rem;
 }
 
 /* Press Kit (Canvas / Standing_Painting / PinBoard) */
@@ -376,73 +388,69 @@
 .item-Standing_Painting,
 .item-Standing-Painting,
 .item-PinBoard {
-  margin-top: 20px;
-  font-size: 2.8rem;
+  margin-top: 60px;
+  font-size: 2.25rem;
 }
 
 /* About Us (Clock) */
 .item-02-Clock,
 .item-Clock {
-  margin-top: 50px;
-  font-size: 2.4rem;
+  margin-top: 150px;
+  font-size: 1.8rem;
 }
 
 .item-02-Monitor002,
 .item-LandScapeMonitor {
-  margin-bottom: -20px;
-}
-
-/* Sizing for zoomed-in table items */
-.in-view.item-LandScapeMonitor,
-.in-view.item-02-Monitor002,
-.in-view.item-Phone,
-.in-view.item-02-Phone,
-.in-view.item-ClipBoard,
-.in-view.item-02-ClipBoard,
-.in-view.item-DrawingTablet,
-.in-view.item-02-Drawing_Tablet {
-  font-size: 2.2rem;
-}
-
-.in-view.item-02-Clock,
-.in-view.item-Clock {
-  font-size: 2.2rem;
+  margin-bottom: -60px;
 }
 
 .in-view.item-02-Clock .hover-icon,
 .in-view.item-Clock .hover-icon {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .in-view.item-02-Bed,
 .in-view.item-Bed {
-  font-size: 2.2rem;
+  font-size: 2.25rem;
 }
 
 .in-view.item-02-Bed .hover-icon,
 .in-view.item-Bed .hover-icon {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.25rem;
+  height: 2.25rem;
 }
 
 .in-view.item-02-Canvas,
 .in-view.item-Standing_Painting,
 .in-view.item-Standing-Painting,
 .in-view.item-PinBoard {
-  font-size: 2.2rem;
+  font-size: 1.5rem;
 }
 
 .in-view.item-02-Canvas .hover-icon,
 .in-view.item-Standing_Painting .hover-icon,
 .in-view.item-Standing-Painting .hover-icon,
 .in-view.item-PinBoard .hover-icon {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 /* ── Mobile Layout (< 768px): Mobile Phone Frame & Responsive Optimization ── */
 @media (max-width: 768px) {
+
+  .studio-loader {
+    padding: 16px;
+  }
+
+  .studio-loader > div {
+    width: min(88vw, 360px);
+  }
+
+  .studio-loader img {
+    max-width: 100%;
+    height: auto;
+  }
 
   .studio-popup,
   .studio-popup.popup-left,

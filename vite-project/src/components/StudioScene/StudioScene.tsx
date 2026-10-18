@@ -271,7 +271,7 @@ function Room({
         }}
       />
       {isLoaded && activeObjects.map((item, i) => (
-        <Html key={i} position={item.position} sprite center transform distanceFactor={6} zIndexRange={[100, 0]} style={{ pointerEvents: "auto" }}>
+        <Html key={i} position={item.position} sprite center transform distanceFactor={0.5} zIndexRange={[100, 0]} style={{ pointerEvents: "auto" }}>
           <div
             className={`floating-icon item-${item.name.replace(/[^a-zA-Z0-9]/g, '-')}${view !== "home" ? " in-view" : ""}`}
             onClick={(e) => {
@@ -486,7 +486,7 @@ function Loader({ onLoaded }: { onLoaded: () => void }) {
       }}
     >
       <div>
-        <img src="./Loading.gif" alt="Loading Bawang" />
+        <img src="/Loading.gif" alt="Loading Bawang" />
       </div>
     </div>
   );
