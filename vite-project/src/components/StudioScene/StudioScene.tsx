@@ -61,6 +61,13 @@ const NAV_BUTTONS: Record<ViewId, NavButton[]> = {
   ],
 };
 
+/** Single-object views open their popup as soon as the camera moves there. */
+const VIEW_POPUPS: Partial<Record<ViewId, { id: string; label: string; position: "left" | "right" }>> = {
+  bed: { id: "Bed", label: "Contact Us", position: "right" },
+  pinboard: { id: "Standing_Painting", label: "Press Kit", position: "left" },
+  clock: { id: "Clock", label: "About Us", position: "right" },
+};
+
 /** Standing in the bedroom, looking toward the desk / monitors. */
 const CAMERA_POSITION: [number, number, number] = [1.75, 3.05, -29.35];
 const CAMERA_TARGET: [number, number, number] = [1.85, 2.85, -28.4];
@@ -172,13 +179,13 @@ function Room({
 
     if (view === "home") {
       const homeLabels: Record<string, { label: string, view: ViewId }> = {
-        "02_Chair": { label: "Silent Trip", view: "table" },
+        // "02_Chair": { label: "Silent Trip", view: "table" },
         "Chair": { label: "Silent Trip", view: "table" },
-        "02_Picture": { label: "Contact Us", view: "bed" },
+        // "02_Picture": { label: "Contact Us", view: "bed" },
         "Posters": { label: "Contact Us", view: "bed" },
-        "02_Canvas": { label: "Press Kit", view: "pinboard" },
+        // "02_Canvas": { label: "Press Kit", view: "pinboard" },
         "Standing_Painting": { label: "Press Kit", view: "pinboard" },
-        "02_Clock": { label: "About Us", view: "clock" },
+        // "02_Clock": { label: "About Us", view: "clock" },
         "Clock": { label: "About Us", view: "clock" }
       };
       const list: { name: string; label: string; position: [number, number, number]; rotation: [number, number, number]; viewId?: ViewId }[] = [];
@@ -553,7 +560,7 @@ export function StudioScene() {
 
   function handleSetView(newView: ViewId) {
     setView(newView);
-    setSelectedObject(null);
+    setSelectedObject(VIEW_POPUPS[newView] ?? null);
   }
 
   function setEdges(ex: EdgeX, ey: EdgeY, ix: number, iy: number) {
@@ -591,10 +598,11 @@ export function StudioScene() {
   }, []);
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("button, .studio-nav, .studio-back, .studio-popup, .floating-icon")) {
+      return;
+    }
     if (selectedObject) return;
-    try {
-      event.currentTarget.setPointerCapture(event.pointerId);
-    } catch {}
     isPointerDownRef.current = true;
     pointerStartRef.current = { x: event.clientX, y: event.clientY };
     lastPointerPosRef.current = { x: event.clientX, y: event.clientY };
@@ -652,12 +660,7 @@ export function StudioScene() {
     }
   };
 
-  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-    try {
-      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-        event.currentTarget.releasePointerCapture(event.pointerId);
-      }
-    } catch {}
+  const handlePointerUp = () => {
     isPointerDownRef.current = false;
     if (isDraggingRef.current) {
       setTimeout(() => {
